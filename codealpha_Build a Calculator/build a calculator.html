@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --case: #24272B;
+    --case-edge: #35393E;
+    --display-bg: #B9C6A6;
+    --display-shadow: #8E9C7C;
+    --display-text: #1E2A16;
+    --key-num: #F1ECE2;
+    --key-num-text: #24272B;
+    --key-num-shadow: #C9C2B3;
+    --key-fn: #565A5F;
+    --key-fn-text: #F1ECE2;
+    --key-fn-shadow: #3A3E43;
+    --key-op: #BE7A3D;
+    --key-op-text: #24272B;
+    --key-op-shadow: #8F5A28;
+    --key-eq: #4E7C6B;
+    --key-eq-text: #F1ECE2;
+    --key-eq-shadow: #345545;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 20%, #34383D, #17181A 70%);
+    font-family: 'IBM Plex Sans', sans-serif;
+    padding: 24px;
+  }
+
+  .calculator {
+    width: 340px;
+    max-width: 100%;
+    background: linear-gradient(160deg, var(--case-edge), var(--case) 30%);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow:
+      0 30px 60px -20px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      inset 0 -2px 0 rgba(0,0,0,0.4);
+  }
+
+  .brand {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 2px 6px 14px;
+    color: #8B9095;
+  }
+
+  .brand .name {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: #9BA0A6;
+  }
+
+  .brand .model {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #6E7278;
+  }
+
+  .display {
+    background: linear-gradient(180deg, var(--display-bg), var(--display-shadow));
+    border-radius: 10px;
+    padding: 20px 16px 14px;
+    margin-bottom: 18px;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.35), inset 0 -1px 0 rgba(255,255,255,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .display::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.03) 0px,
+      rgba(0,0,0,0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+  }
+
+  .display .expression {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    min-height: 18px;
+    color: var(--display-text);
+    opacity: 0.55;
+    text-align: right;
+    overflow-x: auto;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .display .expression::-webkit-scrollbar { display: none; }
+
+  .display .result {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 40px;
+    color: var(--display-text);
+    text-align: right;
+    line-height: 1.15;
+    margin-top: 4px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .display .result::-webkit-scrollbar { display: none; }
+
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  button.key {
+    border: none;
+    border-radius: 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 16px 0;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.06s ease, box-shadow 0.06s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button.key:active,
+  button.key.pressed {
+    transform: translateY(3px);
+  }
+
+  .key-num {
+    background: var(--key-num);
+    color: var(--key-num-text);
+    box-shadow: 0 4px 0 var(--key-num-shadow);
+  }
+  .key-num:active, .key-num.pressed { box-shadow: 0 1px 0 var(--key-num-shadow); }
+
+  .key-fn {
+    background: var(--key-fn);
+    color: var(--key-fn-text);
+    box-shadow: 0 4px 0 var(--key-fn-shadow);
+    font-size: 15px;
+  }
+  .key-fn:active, .key-fn.pressed { box-shadow: 0 1px 0 var(--key-fn-shadow); }
+
+  .key-op {
+    background: var(--key-op);
+    color: var(--key-op-text);
+    box-shadow: 0 4px 0 var(--key-op-shadow);
+    font-size: 20px;
+  }
+  .key-op:active, .key-op.pressed { box-shadow: 0 1px 0 var(--key-op-shadow); }
+
+  .key-eq {
+    background: var(--key-eq);
+    color: var(--key-eq-text);
+    box-shadow: 0 4px 0 var(--key-eq-shadow);
+  }
+  .key-eq:active, .key-eq.pressed { box-shadow: 0 1px 0 var(--key-eq-shadow); }
+
+  .span-2 { grid-column: span 2; }
+
+  button.key:focus-visible {
+    outline: 2px solid #E8B96A;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    button.key { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="calculator">
+    <div class="brand">
+      <span class="name">desk calc</span>
+      <span class="model">mk.01</span>
+    </div>
+
+    <div class="display">
+      <div class="expression" id="expression">&nbsp;</div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="keys">
+      <button class="key key-fn" data-action="clear">C</button>
+      <button class="key key-fn" data-action="backspace">⌫</button>
+      <button class="key key-fn" data-action="percent">%</button>
+      <button class="key key-op" data-action="operator" data-value="÷">÷</button>
+
+      <button class="key key-num" data-action="number" data-value="7">7</button>
+      <button class="key key-num" data-action="number" data-value="8">8</button>
+      <button class="key key-num" data-action="number" data-value="9">9</button>
+      <button class="key key-op" data-action="operator" data-value="×">×</button>
+
+      <button class="key key-num" data-action="number" data-value="4">4</button>
+      <button class="key key-num" data-action="number" data-value="5">5</button>
+      <button class="key key-num" data-action="number" data-value="6">6</button>
+      <button class="key key-op" data-action="operator" data-value="−">−</button>
+
+      <button class="key key-num" data-action="number" data-value="1">1</button>
+      <button class="key key-num" data-action="number" data-value="2">2</button>
+      <button class="key key-num" data-action="number" data-value="3">3</button>
+      <button class="key key-op" data-action="operator" data-value="+">+</button>
+
+      <button class="key key-num span-2" data-action="number" data-value="0">0</button>
+      <button class="key key-num" data-action="decimal">.</button>
+      <button class="key key-eq" data-action="equals">=</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const expressionEl = document.getElementById('expression');
+  const resultEl = document.getElementById('result');
+
+  let currentInput = '0';
+  let previousValue = null;
+  let pendingOperator = null;
+  let justEvaluated = false;
+
+  const opSymbolToJs = { '÷': '/', '×': '*', '−': '-', '+': '+' };
+
+  function formatNumber(numStr) {
+    if (numStr === '' || numStr === '-') return numStr;
+    const num = Number(numStr);
+    if (!isFinite(num)) return 'Error';
+    // Limit displayed precision to avoid float noise, but keep as string during entry
+    let str = numStr;
+    if (str.includes('.') === false) return str;
+    return str;
+  }
+
+  function updateDisplay() {
+    resultEl.textContent = currentInput;
+    if (previousValue !== null && pendingOperator) {
+      expressionEl.textContent = `${previousValue} ${pendingOperator}`;
+    } else {
+      expressionEl.textContent = '\u00A0';
+    }
+  }
+
+  function inputDigit(digit) {
+    if (justEvaluated) {
+      currentInput = digit;
+      justEvaluated = false;
+      previousValue = null;
+      pendingOperator = null;
+      updateDisplay();
+      return;
+    }
+    if (currentInput === '0') {
+      currentInput = digit;
+    } else {
+      if (currentInput.replace('-', '').replace('.', '').length >= 14) return;
+      currentInput += digit;
+    }
+    updateDisplay();
+  }
+
+  function inputDecimal() {
+    if (justEvaluated) {
+      currentInput = '0.';
+      justEvaluated = false;
+      previousValue = null;
+      pendingOperator = null;
+      updateDisplay();
+      return;
+    }
+    if (!currentInput.includes('.')) {
+      currentInput += '.';
+      updateDisplay();
+    }
+  }
+
+  function clearAll() {
+    currentInput = '0';
+    previousValue = null;
+    pendingOperator = null;
+    justEvaluated = false;
+    updateDisplay();
+  }
+
+  function backspace() {
+    if (justEvaluated) {
+      clearAll();
+      return;
+    }
+    if (currentInput.length <= 1 || (currentInput.length === 2 && currentInput.startsWith('-'))) {
+      currentInput = '0';
+    } else {
+      currentInput = currentInput.slice(0, -1);
+    }
+    updateDisplay();
+  }
+
+  function toggleSign() {
+    if (currentInput === '0') return;
+    currentInput = currentInput.startsWith('-') ? currentInput.slice(1) : '-' + currentInput;
+    updateDisplay();
+  }
+
+  function percent() {
+    const val = parseFloat(currentInput);
+    if (isNaN(val)) return;
+    currentInput = trimResult(val / 100);
+    updateDisplay();
+  }
+
+  function trimResult(num) {
+    if (!isFinite(num)) return 'Error';
+    // round to avoid float artifacts, keep up to 10 significant decimal digits
+    let rounded = Math.round((num + Number.EPSILON) * 1e10) / 1e10;
+    let str = String(rounded);
+    if (str.length > 15) {
+      str = rounded.toPrecision(10).replace(/\.?0+$/, '').replace(/\.?0+e/, 'e');
+    }
+    return str;
+  }
+
+  function compute(a, op, b) {
+    switch (op) {
+      case '+': return a + b;
+      case '-': return a - b;
+      case '*': return a * b;
+      case '/': return b === 0 ? NaN : a / b;
+      default: return b;
+    }
+  }
+
+  function setOperator(symbol) {
+    if (pendingOperator && previousValue !== null && !justEvaluated) {
+      // chain operations
+      const a = parseFloat(previousValue);
+      const b = parseFloat(currentInput);
+      const jsOp = opSymbolToJs[pendingOperator];
+      const res = compute(a, jsOp, b);
+      previousValue = trimResult(res);
+      currentInput = previousValue;
+    } else {
+      previousValue = currentInput;
+    }
+    pendingOperator = symbol;
+    justEvaluated = false;
+    updateDisplay();
+  }
+
+  function equals() {
+    if (pendingOperator === null || previousValue === null) return;
+    const a = parseFloat(previousValue);
+    const b = parseFloat(currentInput);
+    const jsOp = opSymbolToJs[pendingOperator];
+    const res = compute(a, jsOp, b);
+    const resultStr = trimResult(res);
+    expressionEl.textContent = `${previousValue} ${pendingOperator} ${currentInput} =`;
+    currentInput = resultStr === 'Error' ? 'Error' : resultStr;
+    previousValue = null;
+    pendingOperator = null;
+    justEvaluated = true;
+    resultEl.textContent = currentInput;
+  }
+
+  function flashKey(btn) {
+    if (!btn) return;
+    btn.classList.add('pressed');
+    setTimeout(() => btn.classList.remove('pressed'), 100);
+  }
+
+  document.querySelectorAll('.key').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      const value = btn.dataset.value;
+      switch (action) {
+        case 'number': inputDigit(value); break;
+        case 'decimal': inputDecimal(); break;
+        case 'clear': clearAll(); break;
+        case 'backspace': backspace(); break;
+        case 'percent': percent(); break;
+        case 'operator': setOperator(value); break;
+        case 'equals': equals(); break;
+      }
+    });
+  });
+
+  const keyMap = {
+    '0': () => inputDigit('0'), '1': () => inputDigit('1'), '2': () => inputDigit('2'),
+    '3': () => inputDigit('3'), '4': () => inputDigit('4'), '5': () => inputDigit('5'),
+    '6': () => inputDigit('6'), '7': () => inputDigit('7'), '8': () => inputDigit('8'),
+    '9': () => inputDigit('9'),
+    '.': () => inputDecimal(),
+    '+': () => setOperator('+'),
+    '-': () => setOperator('−'),
+    '*': () => setOperator('×'),
+    '/': () => setOperator('÷'),
+    'Enter': () => equals(),
+    '=': () => equals(),
+    'Backspace': () => backspace(),
+    'Escape': () => clearAll(),
+    '%': () => percent(),
+  };
+
+  const selectorMap = {
+    '0': '[data-action="number"][data-value="0"]',
+    '1': '[data-action="number"][data-value="1"]',
+    '2': '[data-action="number"][data-value="2"]',
+    '3': '[data-action="number"][data-value="3"]',
+    '4': '[data-action="number"][data-value="4"]',
+    '5': '[data-action="number"][data-value="5"]',
+    '6': '[data-action="number"][data-value="6"]',
+    '7': '[data-action="number"][data-value="7"]',
+    '8': '[data-action="number"][data-value="8"]',
+    '9': '[data-action="number"][data-value="9"]',
+    '.': '[data-action="decimal"]',
+    '+': '[data-action="operator"][data-value="+"]',
+    '-': '[data-action="operator"][data-value="−"]',
+    '*': '[data-action="operator"][data-value="×"]',
+    '/': '[data-action="operator"][data-value="÷"]',
+    'Enter': '[data-action="equals"]',
+    '=': '[data-action="equals"]',
+    'Backspace': '[data-action="backspace"]',
+    'Escape': '[data-action="clear"]',
+    '%': '[data-action="percent"]',
+  };
+
+  window.addEventListener('keydown', (e) => {
+    if (keyMap[e.key]) {
+      e.preventDefault();
+      keyMap[e.key]();
+      const sel = selectorMap[e.key];
+      if (sel) flashKey(document.querySelector(sel));
+    }
+  });
+
+  updateDisplay();
+})();
+</script>
+
+</body>
+</html>
