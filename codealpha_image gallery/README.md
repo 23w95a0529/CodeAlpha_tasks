@@ -64,4 +64,4 @@ To use your own images, replace the `src` in the image template with your own UR
 
 ## License
 
-Free to use and modify for personal or educational projects.
+

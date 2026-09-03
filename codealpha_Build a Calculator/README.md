@@ -56,4 +56,3 @@ Select the main branch and / (root) folder, then Save.
 GitHub will publish it at https://<your-username>.github.io/<your-repo>/ within a minute or two.
 License
 
-Free to use and modify.
